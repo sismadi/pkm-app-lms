@@ -16,6 +16,15 @@
     components.learningModule = function (d) {
         const base = _originalComponent(d);
 
+        // Ambil isi "Daftar Modul" dari sidebar bawaan, lalu pindahkan ke drawer kanan.
+        const sidebarMatch = base.match(/<div class="col-1-3 artikel sidebar">([\s\S]*?)<\/div>\s*<div class="col-2-3 artikel content">/);
+        const sidebarInner = sidebarMatch ? sidebarMatch[1] : '';
+
+        // Hapus kolom sidebar dari layout & jadikan kolom konten lebar penuh.
+        const fullWidth = base
+            .replace(/<div class="col-1-3 artikel sidebar">[\s\S]*?<\/div>\s*(?=<div class="col-2-3 artikel content">)/, '')
+            .replace('col-2-3 artikel content', 'col-1-1 artikel content');
+
         const prevBtn = d.prevId
             ? `<button class="slcBtn" onclick="web.navigate('learn/${d.prevId}')">&larr; Sebelumnya</button>`
             : `<button class="slcBtn" disabled style="opacity:.4">&larr; Sebelumnya</button>`;
@@ -23,11 +32,12 @@
             ? `<button class="slcBtn" onclick="web.navigate('learn/${d.nextId}')">Berikutnya &rarr;</button>`
             : `<button class="slcBtn" disabled style="opacity:.4">Berikutnya &rarr;</button>`;
         const readBtn = `<button class="slcBtn" style="background:var(--aColor);color:#fff;" onclick="openLearnModal()">&#x1F4D6; Baca Penuh</button>`;
+        const drawerBtn = `<button class="slcBtn" style="background:var(--pDarkColor);color:#fff;" onclick="openModulDrawer()">&#x1F4DA; Daftar Modul</button>`;
 
-        const navTop    = `<div class="learn-nav" style="display:flex;gap:8px;margin-bottom:16px;">${prevBtn}${readBtn}${nextBtn}</div>`;
-        const navBottom = `<div class="learn-nav" style="display:flex;gap:8px;margin-top:16px;">${prevBtn}${readBtn}${nextBtn}</div>`;
+        const navTop    = `<div class="learn-nav" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">${drawerBtn}${prevBtn}${readBtn}${nextBtn}</div>`;
+        const navBottom = `<div class="learn-nav" style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;">${prevBtn}${readBtn}${nextBtn}</div>`;
 
-        // Modal
+        // Modal "Baca Penuh"
         const modalHtml = `
 <div id="learnModal" class="learn-modal">
     <div class="learn-modal-content">
@@ -39,13 +49,24 @@
     </div>
 </div>`;
 
-        // navTop disisipkan tepat setelah tag pembuka col-2-3
+        // Drawer kanan "Daftar Modul"
+        const drawerHtml = `
+<div id="modulDrawerOverlay" class="modul-drawer-overlay" onclick="closeModulDrawer()"></div>
+<div id="modulDrawer" class="modul-drawer" role="dialog" aria-label="Daftar Modul">
+    <div class="modul-drawer-header">
+        <span class="modul-drawer-header-title">&#x1F4DA; Daftar Modul</span>
+        <span class="modul-drawer-close" onclick="closeModulDrawer()">&#x2715; Tutup</span>
+    </div>
+    <div class="modul-drawer-body">${sidebarInner}</div>
+</div>`;
+
+        // navTop disisipkan tepat setelah tag pembuka kolom konten
         // navBottom disisipkan sebelum penutup </div> terakhir
-        const withNav = base
-            .replace(/(<div[^>]*class="[^"]*col-2-3[^"]*"[^>]*>)/, '$1' + navTop)
+        const withNav = fullWidth
+            .replace(/(<div[^>]*class="[^"]*col-1-1 artikel content[^"]*"[^>]*>)/, '$1' + navTop)
             .replace(/(<\/div>\s*<\/div>\s*)$/, navBottom + '$1');
 
-        return modalHtml + withNav;
+        return modalHtml + drawerHtml + withNav;
     };
 
     window.openLearnModal = function () {
@@ -80,13 +101,43 @@
         }
     };
 
+    // Drawer kanan "Daftar Modul"
+    window.openModulDrawer = function () {
+        const drawer  = document.getElementById('modulDrawer');
+        const overlay = document.getElementById('modulDrawerOverlay');
+        if (!drawer || !overlay) return;
+        overlay.classList.add('open');
+        drawer.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closeModulDrawer = function () {
+        const drawer  = document.getElementById('modulDrawer');
+        const overlay = document.getElementById('modulDrawerOverlay');
+        if (!drawer || !overlay) return;
+        overlay.classList.remove('open');
+        drawer.classList.remove('open');
+        document.body.style.overflow = '';
+    };
+
+    // Tutup drawer otomatis saat memilih salah satu modul di daftar
+    window.addEventListener('click', function (event) {
+        const drawer = document.getElementById('modulDrawer');
+        if (drawer && drawer.contains(event.target) && event.target.closest('a')) {
+            closeModulDrawer();
+        }
+    });
+
     window.addEventListener('click', function (event) {
         const modal = document.getElementById('learnModal');
         if (event.target === modal) closeLearnModal();
     });
 
     window.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') closeLearnModal();
+        if (event.key === 'Escape') {
+            closeLearnModal();
+            closeModulDrawer();
+        }
     });
 
 })();
