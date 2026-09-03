@@ -1,0 +1,98 @@
+{
+  "title": "OCW-RPL: Open Courseware for Software Engineering (Rekayasa Perangkat Lunak)",
+  "type": "software",
+  "publication_date": "2026-05-26",
+  "abstract": "Open courseware platform for the Rekayasa Perangkat Lunak (Software Engineering) course IMP307 at Universitas IPWIJA, Jakarta. The platform delivers 16 structured modules covering the full software engineering lifecycle: RPL fundamentals and software characteristics (engineered not manufactured, software decay), feasibility studies using the PIECES framework with Cost-Benefit Analysis, project management principles (The 4P's: People, Product, Process, Project; LOC/Function Point/COCOMO estimation), SDLC model comparison (Waterfall, Prototyping, Spiral, RAD, Agile/Scrum), requirements engineering and SRS documentation (Functional vs Non-Functional vs Domain Requirements, Verification vs Validation), analysis modeling (DFD Level 0/1/2, Kamus Data, Transform vs Transaction Mapping), software design (Cohesion & Coupling metrics, architectural, interface, and data design), testing strategies (White Box: Cyclomatic Complexity V(G)=E-N+2P, Basis Path Testing; Black Box: BVA, Equivalence Partitioning, Decision Table), and Software Quality Assurance (SQA vs Testing distinction, FTR mechanism, McCall's 4 Quality Factors: Correctness, Reliability, Maintainability, Usability; IEEE 730, CMMI). Built on DonatJS, a zero-dependency, no-build-step, JSON-driven micro-framework. Lighthouse audit metrics: Performance 98, Accessibility 92, Best Practices 100, SEO 90. HKI Copyright: EC00202414144. Patent: S00202503129 (DJKI Indonesia).",
+  "authors": [
+    {
+      "first_name": "Wawan",
+      "last_name": "Sismadi",
+      "orcid": "0009-0007-2685-5663",
+      "institution": "Universitas IPWIJA",
+      "department": "Teknik Informatika",
+      "country": "Indonesia"
+    }
+  ],
+  "license": "MIT",
+  "language": "Indonesian",
+  "doi": "10.5281/figshare.XXXXXXXX",
+  "repository_url": "https://github.com/sismadi/ocw-rpl",
+  "project_url": "https://sismadi.github.io/ocw-rpl",
+  "version": "1.0.0",
+  "keywords": [
+    "rekayasa perangkat lunak",
+    "software engineering",
+    "sdlc",
+    "agile",
+    "waterfall",
+    "spiral model",
+    "requirements engineering",
+    "srs",
+    "dfd",
+    "data flow diagram",
+    "software design",
+    "cohesion coupling",
+    "white box testing",
+    "cyclomatic complexity",
+    "black box testing",
+    "boundary value analysis",
+    "software quality assurance",
+    "formal technical review",
+    "mccall quality factors",
+    "open courseware",
+    "educational technology",
+    "DonatJS",
+    "Universitas IPWIJA",
+    "Indonesia"
+  ],
+  "research_areas": [
+    "Computer Science",
+    "Software Engineering",
+    "Educational Technology"
+  ],
+  "references": [
+    {
+      "citation": "Pressman, R. S., & Maxim, B. R. (2020). Software Engineering: A Practitioner's Approach (9th ed.). McGraw-Hill.",
+      "type": "book"
+    },
+    {
+      "citation": "Sommerville, I. (2016). Software Engineering (10th ed.). Pearson.",
+      "type": "book"
+    },
+    {
+      "citation": "Sismadi, W. (2024). Pengembangan Aplikasi Web Modern dengan DonatJS. P4I. ISBN 978-623-848-897-1.",
+      "type": "book"
+    },
+    {
+      "citation": "Sismadi, W. (2024). Optimasi Penggunaan SVG dalam Web Development. P4I. ISBN 978-623-876-765-6.",
+      "type": "book"
+    },
+    {
+      "citation": "Sismadi, W. (2024). Analisis Mendalam: Batasan Penggunaan AI dalam Pendidikan. P4I. ISBN 978-634-726-057-4.",
+      "type": "book"
+    },
+    {
+      "citation": "Sismadi, W. (2026). Arsitektur Piawai Mengajar (Manuscript, 9 chapters). Universitas Ahmad Dahlan.",
+      "type": "manuscript"
+    }
+  ],
+  "related_links": [
+    {
+      "label": "Live Deployment — DonatJS LMS",
+      "url": "https://sismadi.github.io/ocw-rpl"
+    },
+    {
+      "label": "Source Repository — GitHub",
+      "url": "https://github.com/sismadi/ocw-rpl"
+    },
+    {
+      "label": "DonatJS Core CDN",
+      "url": "https://donatjs.github.io/core"
+    },
+    {
+      "label": "HKI Copyright — EC00202414144 (DJKI Indonesia)",
+      "url": "https://pdki-indonesia.dgip.go.id"
+    }
+  ],
+  "notes": "ResearchGate does not have a native JSON deposit API. Use this file as a reference template when filling the manual upload form at https://www.researchgate.net/publication/new. Paste the abstract, keywords, and references directly. Upload the source ZIP and set the research type to 'Software'."
+}

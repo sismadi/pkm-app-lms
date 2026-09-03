@@ -1,0 +1,81 @@
+{
+  "title": "OCW-RPL: Open Courseware for Software Engineering (Rekayasa Perangkat Lunak)",
+  "description": "Open courseware platform for the Rekayasa Perangkat Lunak (Software Engineering) course IMP307 at Universitas IPWIJA, Jakarta. Built on DonatJS — a zero-dependency, no-build-step, JSON-driven micro-framework that renders structured page data as dynamic web interfaces entirely in the browser, without any external libraries or build toolchains.\n\nThe platform delivers 16 structured learning modules covering the full software engineering lifecycle: RPL fundamentals and software characteristics (engineered not manufactured, software decay analogy), feasibility studies using the PIECES framework (Performance, Information, Economics, Control, Efficiency, Services) with Cost-Benefit Analysis, project management principles (The 4P's: People, Product, Process, Project; LOC/Function Point/COCOMO estimation; Risk Register), SDLC model comparison (Waterfall, Prototyping, Spiral with 4-quadrant analysis, RAD, Agile/Scrum), requirements engineering and SRS documentation (Functional vs Non-Functional vs Domain Requirements, elicitation techniques, Verification vs Validation distinction), analysis modeling (DFD Level 0/1/2, Kamus Data, Transform vs Transaction Mapping), software design (Cohesion & Coupling metrics, architectural and data design), testing strategies (White Box: Cyclomatic Complexity V(G)=E-N+2P, Basis Path Testing; Black Box: BVA 7-test-case methodology, Equivalence Partitioning, Decision Table), and Software Quality Assurance (SQA vs Testing distinction, FTR mechanism and rules, McCall's 4 Quality Factors, IEEE 730, CMMI levels).\n\nIntegrated engines: password-protected quiz module with base64-encoded answer keys and start-time gating; certificate verifier with unique credential ID lookup (SLS-YYYY-NNN format); sequential module navigation with keyboard shortcuts (←/→); auto-grid layout for info cards via JS hook on ui.render.\n\nFramework lineage: Ktupad (2019, PHP/MVC) → BayamJS (2023, JS/MVC) → DonatJS (2024–2026, JSON-driven CSR).\n\nLighthouse audit metrics — Performance: 98, Accessibility: 92, Best Practices: 100, SEO: 90.\n\nHKI Copyright registration: EC00202414144. Patent application: S00202503129 (DJKI Indonesia).",
+  "defined_type": "software",
+  "access": "open",
+  "license": 1,
+  "authors": [
+    {
+      "name": "Wawan Sismadi",
+      "first_name": "Wawan",
+      "last_name": "Sismadi",
+      "orcid_id": "0009-0007-2685-5663",
+      "institution": "Universitas IPWIJA / PT Sismadi Langit Solusi"
+    }
+  ],
+  "categories": [
+    "Computer Science",
+    "Software Engineering",
+    "Educational Technology",
+    "E-Learning"
+  ],
+  "tags": [
+    "open courseware",
+    "rekayasa perangkat lunak",
+    "software engineering",
+    "sdlc",
+    "agile",
+    "waterfall",
+    "spiral model",
+    "requirements engineering",
+    "srs",
+    "dfd",
+    "data flow diagram",
+    "software design",
+    "cohesion coupling",
+    "white box testing",
+    "cyclomatic complexity",
+    "black box testing",
+    "boundary value analysis",
+    "software quality assurance",
+    "formal technical review",
+    "json-driven UI",
+    "zero dependency",
+    "no-build step",
+    "micro-framework",
+    "DonatJS",
+    "educational technology",
+    "open education",
+    "Universitas IPWIJA",
+    "Indonesia"
+  ],
+  "references": [
+    "Pressman, R. S., & Maxim, B. R. (2020). Software Engineering: A Practitioner's Approach (9th ed.). McGraw-Hill.",
+    "Sommerville, I. (2016). Software Engineering (10th ed.). Pearson.",
+    "Sismadi, W. (2024). Pengembangan Aplikasi Web Modern dengan DonatJS. P4I. ISBN 978-623-848-897-1.",
+    "Sismadi, W. (2024). Optimasi Penggunaan SVG dalam Web Development. P4I. ISBN 978-623-876-765-6.",
+    "Sismadi, W. (2024). Analisis Mendalam: Batasan Penggunaan AI dalam Pendidikan. P4I. ISBN 978-634-726-057-4.",
+    "Sismadi, W. (2026). Arsitektur Piawai Mengajar (Manuscript, 9 chapters). Universitas Ahmad Dahlan."
+  ],
+  "related_materials": [
+    {
+      "title": "DonatJS LMS — Live Deployment",
+      "url": "https://sismadi.github.io/ocw-rpl",
+      "relation": "IsDocumentedBy",
+      "identifier_type": "URL"
+    },
+    {
+      "title": "Source Repository — GitHub",
+      "url": "https://github.com/sismadi/ocw-rpl",
+      "relation": "IsSupplementTo",
+      "identifier_type": "URL"
+    },
+    {
+      "title": "DonatJS Core CDN",
+      "url": "https://donatjs.github.io/core",
+      "relation": "Requires",
+      "identifier_type": "URL"
+    }
+  ],
+  "funding": []
+}

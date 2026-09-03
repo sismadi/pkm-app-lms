@@ -1,0 +1,46 @@
+cff-version: 1.2.0
+message: "If you use this courseware, please cite it as below."
+type: software
+title: "OCW-RPL: Open Courseware Rekayasa Perangkat Lunak"
+abstract: >
+  Open courseware platform for the Rekayasa Perangkat Lunak (Software Engineering) course
+  IMP307 at Universitas IPWIJA, Jakarta. 16 structured modules covering the full software
+  engineering lifecycle: RPL fundamentals, feasibility studies (PIECES framework), project
+  management (4P), SDLC models (Waterfall, Spiral, Agile, RAD), requirements engineering
+  and SRS documentation, analysis modeling (DFD & data dictionary), software design
+  (architectural, interface, and data design), testing strategies (White Box — Cyclomatic
+  Complexity & Basis Path; Black Box — BVA & Equivalence Partitioning), and Software
+  Quality Assurance (SQA, FTR, McCall's quality metrics). Powered by DonatJS micro-framework.
+authors:
+  - family-names: Sismadi
+    given-names: Wawan
+    orcid: "https://orcid.org/0009-0007-2685-5663"
+    affiliation: "Universitas IPWIJA, Jakarta"
+version: "1.0.0"
+date-released: "2026-05-26"
+doi: "10.6084/m9.figshare.XXXXXXXX"
+license: MIT
+repository-code: "https://github.com/sismadi/ocw-rpl"
+url: "https://sismadi.github.io/ocw-rpl"
+keywords:
+  - rekayasa perangkat lunak
+  - software engineering
+  - sdlc
+  - waterfall
+  - agile
+  - spiral
+  - requirements engineering
+  - srs
+  - dfd
+  - software design
+  - white box testing
+  - black box testing
+  - cyclomatic complexity
+  - boundary value analysis
+  - software quality assurance
+  - sqa
+  - formal technical review
+  - open courseware
+  - donatjs
+  - ipwija
+  - indonesia
