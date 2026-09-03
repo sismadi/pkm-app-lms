@@ -1,124 +1,92 @@
-/**
- * auth-patch.js
- * ------------------------------------------------------------
- * Login/Register dengan akun Google (Google Identity Services)
- * terhubung ke cf-api (POST /auth/google) untuk memperoleh
- * token internal (HMAC) + role user (peserta/instruktur/admin).
- *
- * Pola: non-destructive patch — hanya MENAMBAH objek `auth` baru
- * dan beberapa properti ke `web`, tanpa mengubah script.js.
- * Prinsip: Reuse · DRY · Modular · Scalable.
- * ------------------------------------------------------------
- */
+(function () {
+    const _original = web.resolveLearningModule.bind(web);
+    web.resolveLearningModule = function (id) {
+        const result = _original(id);
+        const moduleBlock = result.find(d => d.section === 'learningModule');
+        if (!moduleBlock) return result;
+        const categories = moduleBlock.data.categories || [];
+        const allItems   = categories.flatMap(cat => cat.items || []);
+        const activeIdx  = allItems.findIndex(i => i.id === moduleBlock.activeId);
+        moduleBlock.prevId = allItems[activeIdx - 1]?.id || null;
+        moduleBlock.nextId = allItems[activeIdx + 1]?.id || null;
+        return result;
+    };
 
-const auth = {
+    const _originalComponent = components.learningModule;
+    components.learningModule = function (d) {
+        const base = _originalComponent(d);
 
-    STORAGE_KEY: 'ocw_auth_session',
+        const prevBtn = d.prevId
+            ? `<button class="slcBtn" onclick="web.navigate('learn/${d.prevId}')">&larr; Sebelumnya</button>`
+            : `<button class="slcBtn" disabled style="opacity:.4">&larr; Sebelumnya</button>`;
+        const nextBtn = d.nextId
+            ? `<button class="slcBtn" onclick="web.navigate('learn/${d.nextId}')">Berikutnya &rarr;</button>`
+            : `<button class="slcBtn" disabled style="opacity:.4">Berikutnya &rarr;</button>`;
+        const readBtn = `<button class="slcBtn" style="background:var(--aColor);color:#fff;" onclick="openLearnModal()">&#x1F4D6; Baca Penuh</button>`;
 
-    // ---------------------------------------------------------
-    // Sesi (localStorage) — satu sumber kebenaran untuk seluruh app
-    // ---------------------------------------------------------
+        const navTop    = `<div class="learn-nav" style="display:flex;gap:8px;margin-bottom:16px;">${prevBtn}${readBtn}${nextBtn}</div>`;
+        const navBottom = `<div class="learn-nav" style="display:flex;gap:8px;margin-top:16px;">${prevBtn}${readBtn}${nextBtn}</div>`;
 
-    getSession: function () {
-        try { return JSON.parse(localStorage.getItem(this.STORAGE_KEY)) || null; }
-        catch (e) { return null; }
-    },
+        // Modal
+        const modalHtml = `
+<div id="learnModal" class="learn-modal">
+    <div class="learn-modal-content">
+        <div class="learn-modal-header">
+            <span class="learn-modal-header-title">&#x1F4D6; Mode Baca Penuh</span>
+            <span class="learn-modal-close" onclick="closeLearnModal()">&#x2715; Tutup</span>
+        </div>
+        <div class="learn-modal-body"></div>
+    </div>
+</div>`;
 
-    getToken: function () { const s = this.getSession(); return s ? s.token : null; },
-    getUser:  function () { const s = this.getSession(); return s ? s.user  : null; },
-    isLoggedIn: function () { return !!this.getToken(); },
+        // navTop disisipkan tepat setelah tag pembuka col-2-3
+        // navBottom disisipkan sebelum penutup </div> terakhir
+        const withNav = base
+            .replace(/(<div[^>]*class="[^"]*col-2-3[^"]*"[^>]*>)/, '$1' + navTop)
+            .replace(/(<\/div>\s*<\/div>\s*)$/, navBottom + '$1');
 
-    setSession: function (token, user) {
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify({ token: token, user: user }));
-        this.renderAuthUI();
-    },
+        return modalHtml + withNav;
+    };
 
-    logout: function () {
-        localStorage.removeItem(this.STORAGE_KEY);
-        this.renderAuthUI();
-        web.navigate('home');
-    },
+    window.openLearnModal = function () {
+        const modal = document.getElementById('learnModal');
+        if (!modal) return;
+        const modalBody = modal.querySelector('.learn-modal-body');
 
-    // ---------------------------------------------------------
-    // Wrapper fetch ke cf-api — otomatis sisipkan Bearer token
-    // (dipakai ulang oleh dashboard-patch.js, form apa pun ke depannya)
-    // ---------------------------------------------------------
+        const contentPanel = document.querySelector('.col-2-3');
+        if (contentPanel && modalBody) {
+            const clone = contentPanel.cloneNode(true);
+            clone.querySelectorAll('.learn-nav').forEach(el => el.remove());
 
-    apiFetch: function (path, opts) {
-        opts = opts || {};
-        const token   = this.getToken();
-        const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
-        if (token) headers.Authorization = 'Bearer ' + token;
-        return fetch(APP_CONFIG.API_BASE_URL + path, Object.assign({}, opts, { headers: headers }));
-    },
+            // sv-code lebar penuh dalam modal
+            clone.querySelectorAll('pre.sv-code').forEach(el => {
+                el.style.maxWidth  = '100%';
+                el.style.width     = '100%';
+                el.style.boxSizing = 'border-box';
+            });
 
-    roleLabel: function (role) {
-        return { admin: 'Admin', instruktur: 'Instruktur', peserta: 'Peserta' }[role] || 'Peserta';
-    },
-
-    // ---------------------------------------------------------
-    // UI: tombol login / kartu profil di header
-    // ---------------------------------------------------------
-
-    renderAuthUI: function () {
-        const slot = web.gebi('authSlot');
-        if (!slot) return;
-        const user = this.getUser();
-
-        if (!user) {
-            slot.innerHTML = '<div id="google-btn-header"></div>';
-            this.renderGoogleButton('google-btn-header');
-            return;
+            modalBody.innerHTML = clone.innerHTML;
         }
 
-        slot.innerHTML =
-            '<div class="auth-chip" onclick="web.navigate(\'dashboard\')" title="Buka dashboard saya">' +
-                (user.picture ? '<img src="' + user.picture + '" class="auth-avatar" alt="' + user.name + '">' : '') +
-                '<span class="auth-name">' + user.name + '</span>' +
-                '<span class="badge auth-role">' + this.roleLabel(user.role) + '</span>' +
-            '</div>' +
-            '<button class="slcBtn auth-logout" onclick="auth.logout()">Keluar</button>';
-    },
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    };
 
-    /** Render tombol "Sign in with Google" ke elemen manapun (dipakai di header & loginGate) */
-    renderGoogleButton: function (elId) {
-        const el = web.gebi(elId);
-        if (!el || typeof google === 'undefined' || !google.accounts) return;
-        google.accounts.id.renderButton(el, {
-            theme: 'outline', size: 'medium', text: 'signin_with', shape: 'pill'
-        });
-    },
+    window.closeLearnModal = function () {
+        const modal = document.getElementById('learnModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    };
 
-    initGoogle: function () {
-        if (typeof google === 'undefined' || !google.accounts) return;
-        google.accounts.id.initialize({
-            client_id: APP_CONFIG.GOOGLE_CLIENT_ID,
-            callback: auth.handleCredential
-        });
-        this.renderAuthUI();
-    },
+    window.addEventListener('click', function (event) {
+        const modal = document.getElementById('learnModal');
+        if (event.target === modal) closeLearnModal();
+    });
 
-    /** Callback GIS setelah user memilih akun Google — verifikasi via cf-api */
-    handleCredential: function (response) {
-        fetch(APP_CONFIG.API_BASE_URL + '/auth/google', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ credential: response.credential })
-        })
-        .then(function (r) { return r.json(); })
-        .then(function (payload) {
-            if (!payload.ok) { alert('Login gagal: ' + (payload.error || 'unknown error')); return; }
-            auth.setSession(payload.data.token, payload.data.user);
-            web.navigate('dashboard');
-        })
-        .catch(function (e) { alert('Login gagal: ' + e.message); });
-    }
-};
+    window.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') closeLearnModal();
+    });
 
-// Inisialisasi setelah GIS script (async/defer) siap
-window.addEventListener('load', function () {
-    (function tryInit() {
-        if (typeof google !== 'undefined' && google.accounts) auth.initGoogle();
-        else setTimeout(tryInit, 200);
-    })();
-});
+})();
