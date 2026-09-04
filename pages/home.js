@@ -20,7 +20,14 @@ pages.home = [
         imgClass: 'di-donat'
     },
 
-    // 2. KEY FEATURES — diambil dari 4 bagian kurikulum learn.js
+    // 2. KATALOG KURSUS
+    {
+        section: 'courseCatalog',
+        title: 'Katalog Kursus',
+        description: 'Pilih kursus yang ingin kamu ikuti. Semua kursus di bawah ini gratis — daftar sekarang dan mulai belajar.'
+    },
+
+    // 3. KEY FEATURES — diambil dari 4 bagian kurikulum learn.js
     {
         section: 'features',
         items: [
@@ -48,7 +55,7 @@ pages.home = [
         ]
     },
 
-    // 3. KURIKULUM + CARA SITASI
+    // 4. KURIKULUM + CARA SITASI
     {
         section: 'article',
         leftCol: {

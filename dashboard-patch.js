@@ -71,6 +71,33 @@ function loadPrivateDashboard() {
         });
 }
 
+/**
+ * Gabungkan kursus yang didaftarkan lewat katalog Home (disimpan
+ * lokal oleh catalog-patch.js, karena endpoint enroll di cf-api
+ * mungkin belum tersedia) ke daftar kursus dari server — supaya
+ * peserta langsung melihat kursus barunya di dashboard tanpa
+ * menunggu backend menyusul. Kursus yang sudah dikenal server
+ * tidak diduplikasi.
+ */
+function mergeLocalEnrollments(serverCourses) {
+    const merged = serverCourses.slice();
+    if (typeof window.getLocalEnrollments !== 'function' || !window.CATALOG_COURSES) return merged;
+
+    window.getLocalEnrollments().forEach(function (courseId) {
+        const already = merged.some(function (c) {
+            return c.id === courseId || c.courseId === courseId || c.slug === courseId;
+        });
+        if (already) return;
+
+        const meta = window.CATALOG_COURSES.find(function (c) { return c.id === courseId; });
+        if (meta) {
+            merged.push({ id: meta.id, title: meta.title, category: meta.category, progressPct: 0 });
+        }
+    });
+
+    return merged;
+}
+
 function renderPrivateDashboard(data) {
     const user = auth.getUser();
     const sections = [
@@ -105,18 +132,19 @@ function renderPrivateDashboard(data) {
         });
     } else {
         const avg = data.summary.rataRataProgress || 0;
+        const myCourses = mergeLocalEnrollments(data.myCourses || []);
         sections.push({
             section: 'statGrid',
             items: [
-                { label: 'Kursus Diikuti',   value: data.summary.totalKursusDiikuti },
+                { label: 'Kursus Diikuti',   value: myCourses.length },
                 { label: 'Rata-rata Progres', value: avg + '%' }
             ]
         });
         sections.push({
             section: 'progressList',
             title: 'Progres Belajar Saya',
-            items: (data.myCourses || []).map(function (c) {
-                return { title: c.title, category: c.category, progressPct: c.progressPct };
+            items: myCourses.map(function (c) {
+                return { title: c.title, category: c.category, progressPct: c.progressPct || 0 };
             })
         });
     }

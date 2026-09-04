@@ -74,7 +74,7 @@
         if (!modal) return;
         const modalBody = modal.querySelector('.learn-modal-body');
 
-        const contentPanel = document.querySelector('.col-2-3');
+        const contentPanel = document.querySelector('.col-1-1.artikel.content');
         if (contentPanel && modalBody) {
             const clone = contentPanel.cloneNode(true);
             clone.querySelectorAll('.learn-nav').forEach(el => el.remove());
@@ -121,12 +121,19 @@
     };
 
     // Tutup drawer otomatis saat memilih salah satu modul di daftar
+    // PENTING: pakai capture phase (true) supaya listener ini jalan SEBELUM
+    // onclick link (web.navigate) mengganti ulang DOM drawer. Kalau pakai
+    // bubble phase biasa, saat listener ini jalan, drawer lama sudah
+    // diganti drawer baru oleh web.navigate(), sehingga
+    // drawer.contains(event.target) selalu false, closeModulDrawer() tidak
+    // pernah terpanggil, dan document.body.style.overflow tetap 'hidden'
+    // selamanya (halaman jadi tidak bisa discroll).
     window.addEventListener('click', function (event) {
         const drawer = document.getElementById('modulDrawer');
         if (drawer && drawer.contains(event.target) && event.target.closest('a')) {
             closeModulDrawer();
         }
-    });
+    }, true);
 
     window.addEventListener('click', function (event) {
         const modal = document.getElementById('learnModal');
@@ -138,6 +145,14 @@
             closeLearnModal();
             closeModulDrawer();
         }
+    });
+
+    // Jaga-jaga: tombol back/forward browser memicu 'popstate' -> web.navigate()
+    // langsung, tanpa lewat closeModulDrawer()/closeLearnModal(). Kalau drawer
+    // atau modal kebetulan sedang terbuka saat itu terjadi, body.style.overflow
+    // bisa tersangkut 'hidden' selamanya. Reset paksa di sini sebagai jaring pengaman.
+    window.addEventListener('popstate', function () {
+        document.body.style.overflow = '';
     });
 
 })();

@@ -946,11 +946,13 @@ input:not([type=checkbox]):not([type=radio]), select, textarea {
   background: rgba(0, 0, 0, 0.5);
   opacity: 0;
   visibility: hidden;
-  transition: opacity var(--transition-fast);
+  pointer-events: none;
+  transition: opacity var(--transition-fast), visibility var(--transition-fast);
 }
 .modul-drawer-overlay.open {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 .modul-drawer {
@@ -967,9 +969,11 @@ input:not([type=checkbox]):not([type=radio]), select, textarea {
   transition: transform .28s ease;
   display: flex;
   flex-direction: column;
+  pointer-events: none;
 }
 .modul-drawer.open {
   transform: translateX(0);
+  pointer-events: auto;
 }
 
 .modul-drawer-header {

@@ -2,6 +2,8 @@
 const pageFiles = [
   "home"
 , "learn"
+, "pbo"
+, "robotika"
 , "kuis"
 , "cert"
 ];  // tambah "users"
