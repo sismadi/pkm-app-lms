@@ -136,31 +136,63 @@ window.CATALOG_COURSES = CATALOG_COURSES;
     // 3. Proses pendaftaran
     // -----------------------------------------------------------
 
+    // CATATAN PERBAIKAN: sebelumnya fungsi ini langsung menganggap
+    // pendaftaran "berhasil" begitu tersimpan di localStorage, lalu
+    // memanggil cf-api secara best-effort dan MEMBUNGKAM errornya
+    // (`.catch(function(){})`). Akibatnya tombol berubah jadi
+    // "Terdaftar" walau request ke database sama sekali gagal (backend
+    // waktu itu memang belum punya endpoint /courses/:id/enroll yang
+    // benar -- lihat perbaikan di pkm-api-lms/index.js).
+    //
+    // Sekarang: localStorage hanya diisi SETELAH backend mengonfirmasi
+    // sukses. Kalau backend gagal (belum login, endpoint error, dsb),
+    // user diberi tahu jujur dan tombol kembali ke "Daftar".
     function completeEnroll(courseId, fromLogin) {
         const course = CATALOG_COURSES.find(function (c) { return c.id === courseId; });
-        saveEnrollment(courseId);
-
-        // Best-effort ke backend — mengikuti pola auth.apiFetch yang sudah
-        // ada. Kalau endpoint belum tersedia di cf-api, kegagalan ini
-        // diabaikan; pendaftaran tetap tercatat & tampil lewat cache lokal.
-        if (auth.isLoggedIn()) {
-            auth.apiFetch('/courses/' + courseId + '/enroll', { method: 'POST' })
-                .catch(function () { /* diam-diam gagal, sudah ada fallback lokal */ });
-        }
-
-        refreshCatalogButtons();
-
         const namaKursus = course ? course.title : 'Kursus';
-        window.alert(
-            '\u2705 ' + namaKursus + ' berhasil ditambahkan ke profil kamu' +
-            (fromLogin ? ' setelah login.' : '.') +
-            ' Cek di menu Dashboard.'
-        );
+        const btn = document.getElementById('enrollBtn-' + courseId);
 
-        // Kalau kebetulan sedang membuka halaman dashboard, muat ulang
-        // supaya kursus baru langsung terlihat di "Kursus Saya".
-        const currentSlug = (window.location.search.substring(1) || '').split('/')[0];
-        if (currentSlug === 'dashboard') web.navigate('dashboard');
+        if (btn) { btn.disabled = true; btn.textContent = 'Mendaftarkan...'; }
+
+        auth.apiFetch('/courses/' + courseId + '/enroll', { method: 'POST' })
+            .then(function (res) {
+                return res.json().catch(function () { return {}; }).then(function (payload) {
+                    return { status: res.status, payload: payload };
+                });
+            })
+            .then(function (result) {
+                if (result.status === 401) {
+                    if (btn) { btn.disabled = false; btn.textContent = '\u{1F4DD} Daftar'; }
+                    auth.logout();
+                    return;
+                }
+                if (!result.payload || !result.payload.ok) {
+                    if (btn) { btn.disabled = false; btn.textContent = '\u{1F4DD} Daftar'; }
+                    window.alert(
+                        '\u274C Gagal mendaftar ke ' + namaKursus + ': ' +
+                        (result.payload && result.payload.error ? result.payload.error : 'terjadi kesalahan pada server')
+                    );
+                    return;
+                }
+
+                // Backend sudah konfirmasi baris masuk ke tabel `enrollments`
+                // di D1 -- baru sekarang aman ditandai terdaftar secara lokal.
+                saveEnrollment(courseId);
+                refreshCatalogButtons();
+
+                window.alert(
+                    '\u2705 ' + namaKursus + ' berhasil ditambahkan ke profil kamu' +
+                    (fromLogin ? ' setelah login.' : '.') +
+                    ' Cek di menu Dashboard.'
+                );
+
+                const currentSlug = (window.location.search.substring(1) || '').split('/')[0];
+                if (currentSlug === 'dashboard') web.navigate('dashboard');
+            })
+            .catch(function (e) {
+                if (btn) { btn.disabled = false; btn.textContent = '\u{1F4DD} Daftar'; }
+                window.alert('\u274C Gagal mendaftar (jaringan/server): ' + e.message);
+            });
     }
 
     window.enrollCourse = function (courseId) {
@@ -238,7 +270,30 @@ window.CATALOG_COURSES = CATALOG_COURSES;
             }
         });
     }
-    window.addEventListener('load', refreshCatalogButtons);
+
+    // Sumber kebenaran sesungguhnya adalah database, bukan localStorage
+    // (localStorage cuma cache biar tombol responsif tanpa nunggu fetch).
+    // Begitu halaman dibuka & user sudah login, tarik status pendaftaran
+    // asli dari /dashboard (sudah difilter server-side per user) supaya
+    // "Terdaftar" tetap benar walau dibuka dari HP/browser lain.
+    function syncEnrollmentsFromServer() {
+        if (typeof auth === 'undefined' || !auth.isLoggedIn()) return;
+        auth.apiFetch('/dashboard')
+            .then(function (res) { return res.ok ? res.json() : null; })
+            .then(function (payload) {
+                if (!payload || !payload.ok || payload.data.role !== 'peserta') return;
+                (payload.data.myCourses || []).forEach(function (c) {
+                    if (c.slug) saveEnrollment(c.slug);
+                });
+                refreshCatalogButtons();
+            })
+            .catch(function () { /* diam-diam gagal, cache lokal tetap dipakai sbg fallback */ });
+    }
+
+    window.addEventListener('load', function () {
+        refreshCatalogButtons();
+        syncEnrollmentsFromServer();
+    });
 
     // -----------------------------------------------------------
     // 6. Komponen render: Katalog Kursus
