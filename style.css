@@ -315,6 +315,11 @@ input:not([type=checkbox]):not([type=radio]), select, textarea {
   margin: 2px;
 }
 
+/* Varian status kuis/sertifikat (dashboard-quiz-patch.js) */
+.badge-success { background: var(--color-success); }
+.badge-warning { background: #c98a1f; }
+.badge-muted   { background: var(--color-muted); }
+
 .tl-item {
   border-left: 3px solid var(--pLightColor);
   padding: 0 0 20px 20px;
