@@ -106,7 +106,11 @@ function renderPrivateDashboard(data) {
           description: 'Selamat datang, ' + (user ? user.name : '') + '.' }
     ];
 
-    if (data.role === 'admin' || data.role === 'instruktur') {
+    // PATCH: admin & instruktur SEKARANG dipisah (sebelumnya digabung
+    // menjadi satu cabang "ringkasan seluruh platform"). Instruktur
+    // kini hanya melihat kursus yang benar-benar dia ampu — lihat
+    // handlePrivateDashboard() di cf-api (cabang role === 'instruktur').
+    if (data.role === 'admin') {
         sections.push({
             section: 'statGrid',
             items: [
@@ -128,6 +132,37 @@ function renderPrivateDashboard(data) {
             title: 'Rata-rata Progres per Kursus',
             items: (data.allCourses || []).map(function (c) {
                 return { title: c.title, category: c.category, progressPct: c.avgProgress };
+            })
+        });
+        sections.push({
+            section: 'adminCallout',
+            text: 'Untuk mengangkat peserta menjadi instruktur, atau menugaskan kursus ke instruktur, buka Panel Admin.',
+            linkLabel: 'Buka Panel Admin',
+            linkSlug: 'admin'
+        });
+    } else if (data.role === 'instruktur') {
+        // Dashboard Instruktur: berapa kursus yang diampu, berapa
+        // peserta di tiap kursus, rata-rata progres, & lulus kuis.
+        const myCourses = data.myCourses || [];
+        sections.push({
+            section: 'statGrid',
+            items: [
+                { label: 'Kursus Diampu',     value: data.summary.totalKursus },
+                { label: 'Total Peserta',     value: data.summary.totalPeserta },
+                { label: 'Rata-rata Progres', value: (data.summary.rataRataProgress || 0) + '%' },
+                { label: 'Lulus Kuis',        value: data.summary.totalLulusKuis }
+            ]
+        });
+        sections.push({
+            section: 'courseStatTable',
+            title: 'Kursus yang Saya Ampu',
+            emptyText: 'Anda belum ditugaskan mengampu kursus apa pun. Hubungi admin untuk penugasan kursus.',
+            items: myCourses.map(function (c) {
+                return {
+                    title: c.title, category: c.category,
+                    enrolledCount: c.enrolledCount, avgProgress: c.avgProgress,
+                    lulusCount: c.lulusCount
+                };
             })
         });
     } else {
@@ -268,6 +303,52 @@ components.progressList = function (d) {
                 );
             }).join('') : '<p>Belum ada data.</p>') +
         '</div></div>'
+    );
+};
+
+/**
+ * Tabel kursus + statistik peserta per kursus — dipakai Dashboard
+ * Instruktur ("Kursus yang Saya Ampu": jumlah peserta, rata-rata
+ * progres, jumlah lulus kuis per kursus). Reuse gaya `.table-container`
+ * yang sudah ada di style.css (dipakai juga oleh halaman lain).
+ */
+components.courseStatTable = function (d) {
+    const items = d.items || [];
+    return (
+        '<div class="row page"><div class="artikel">' +
+            (d.title ? '<h3>' + d.title + '</h3><hr>' : '') +
+            (items.length
+                ? '<div class="table-container"><table><thead><tr>' +
+                    '<th>Kursus</th><th>Kategori</th><th>Peserta</th><th>Rata-rata Progres</th><th>Lulus Kuis</th>' +
+                  '</tr></thead><tbody>' +
+                    items.map(function (it) {
+                        return (
+                            '<tr>' +
+                                '<td>' + it.title + '</td>' +
+                                '<td>' + (it.category || '-') + '</td>' +
+                                '<td>' + (it.enrolledCount || 0) + '</td>' +
+                                '<td>' + (it.avgProgress || 0) + '%</td>' +
+                                '<td>' + (it.lulusCount || 0) + '</td>' +
+                            '</tr>'
+                        );
+                    }).join('') +
+                  '</tbody></table></div>'
+                : '<p>' + (d.emptyText || 'Belum ada data.') + '</p>') +
+        '</div></div>'
+    );
+};
+
+/** Kartu ajakan (call-to-action) kecil — dipakai dashboard admin untuk menautkan ke Panel Admin */
+components.adminCallout = function (d) {
+    return (
+        '<div class="row page">' +
+            '<div class="artikel card-input">' +
+                '<p>' + (d.text || '') + '</p>' +
+                '<button class="slcBtn" onclick="web.navigate(\'' + (d.linkSlug || 'admin') + '\')">' +
+                    (d.linkLabel || 'Buka') +
+                '</button>' +
+            '</div>' +
+        '</div>'
     );
 };
 
